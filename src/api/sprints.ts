@@ -5,7 +5,7 @@ type SprintResult = {
   displayName: string;
 };
 
-type DetailedSprint = {
+export type DetailedSprint = {
   id: string;
   name: string;
   state: "active" | "future" | "closed";
@@ -54,4 +54,26 @@ export async function getSprints({ fieldName, fieldValue }: GetSprintsParams) {
   });
 
   return filteredSprints;
+}
+
+/** Resolve sprint ids to active membership via Agile API (issue search payloads often omit sprint state). */
+export async function resolveActiveSprintIds(ids: string[]): Promise<Set<string>> {
+  const unique = [...new Set(ids.filter(Boolean))];
+  const results = await Promise.all(
+    unique.map(async (id) => {
+      try {
+        return await request<DetailedSprint>(`/sprint/${id}`, { useAgileApi: true });
+      } catch {
+        return null;
+      }
+    }),
+  );
+
+  const active = new Set<string>();
+  for (const sprint of results) {
+    if (sprint?.state === "active") {
+      active.add(sprint.id);
+    }
+  }
+  return active;
 }
