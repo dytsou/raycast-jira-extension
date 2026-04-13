@@ -9,6 +9,7 @@ import IssueListFallback from "./components/IssueListFallback";
 import IssueListItem from "./components/IssueListItem";
 import StatusIssueList from "./components/StatusIssueList";
 import { getProjectAvatar } from "./helpers/avatars";
+import { withProjectFilter } from "./helpers/jql";
 import { withJiraCredentials } from "./helpers/withJiraCredentials";
 import useIssues from "./hooks/useIssues";
 
@@ -77,16 +78,6 @@ function getIssueSprints(issue: { fields: Record<string, unknown> }): SprintInfo
 
 export function isInActiveSprint(issue: { fields: Record<string, unknown> }): boolean {
   return getIssueSprints(issue).some((s) => s.isActive);
-}
-
-function withProjectFilter(jql: string, projectKey: string | undefined): string {
-  const key = projectKey?.trim();
-  if (!key) return jql;
-  const orderIdx = jql.indexOf(" ORDER BY ");
-  if (orderIdx === -1) {
-    return `${jql} AND project = '${key}'`;
-  }
-  return `${jql.slice(0, orderIdx)} AND project = '${key}'${jql.slice(orderIdx)}`;
 }
 
 export function OpenIssues() {
