@@ -25,7 +25,11 @@ function isSprintLike(value: unknown): value is SprintLike {
   }
 
   const sprint = value as Record<string, unknown>;
-  return typeof sprint.name === "string" && typeof sprint.id !== "undefined";
+  return (
+    typeof sprint.name === "string" &&
+    typeof sprint.id !== "undefined" &&
+    (sprint.state === "active" || sprint.state === "future" || sprint.state === "closed")
+  );
 }
 
 function getIssueSprints(issue: { fields: Record<string, unknown> }): SprintInfo[] {
